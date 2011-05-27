@@ -20,28 +20,36 @@ module Puppet
                         tdata = data.clone
 
                         while tdata =~ /%\{(.+?)\}/
-                            tdata.gsub!(/%\{#{$1}\}/, scope[$1])
+                            tdata.gsub!(/%\{#{$1}\}/, scope.lookupvar($1))
                         end
 
                         return tdata
                     end
 
-                    def datadir(config)
+                    def datadir(config, scope)
                         datadir = File.join(File.dirname(Puppet.settings[:config]), "extdata")
 
-                        if config[:csv][:datadir]
+                        scope_dir = scope.lookupvar("extlookup_datadir")
+
+                        # use the backward compat $extlookup_datadir if its
+                        # set else use the config file
+                        if scope_dir != ""
+                            Puppet.notice("extlookup/csv: Using the global variable $extlookup_datadir is deprecated, please use a config file instead")
+
+                            datadir = scope_dir
+                        elsif config[:csv][:datadir]
                             datadir = config[:csv][:datadir]
                         else
-                            Puppet.notice("Using #{datadir} for extlookup CSV data as no datadir is configured")
+                            Puppet.notice("extlookup/csv: Using #{datadir} for extlookup CSV data as no datadir is configured")
                         end
 
-                        raise(Puppet::ParseError, "Extlookup CSV datadir not found") unless File.directory?(datadir)
+                        raise(Puppet::ParseError, "Extlookup CSV datadir (#{datadir}) not found") unless File.directory?(datadir)
 
                         return datadir
                     end
 
                     def parse_csv(data, scope)
-                        Puppet.debug("extlookup/csv parsing #{data} for special characters")
+                        Puppet.debug("extlookup/csv: parsing #{data} for special characters")
 
                         answer = nil
 
@@ -71,18 +79,24 @@ module Puppet
                     def lookup(key, default, override, config, scope)
                         answer = nil
 
-                        Puppet.debug("extlookup/csv looking for key=#{key} with default=#{default}")
+                        Puppet.debug("extlookup/csv: looking for key=#{key} with default=#{default}")
 
                         raise(Puppet::ParseError, "Extlookup CSV backend is unconfigured") unless config.include?(:csv)
 
-                        precedence = config[:precedence] || ["common"]
+                        # use backward compat global variables if they exist
+                        # use the config file if they dont
+                        if scope.lookupvar("extlookup_precedence")
+                            precedence = scope.lookupvar("extlookup_precedence")
+                        else
+                            precedence = config[:precedence] || ["common"]
+                        end
 
-                        csvdir = datadir(config)
-                        Puppet.debug("extlookup/csv Looking for data in #{csvdir}")
+                        csvdir = datadir(config, scope)
+                        Puppet.debug("extlookup/csv: Looking for data in #{csvdir}")
 
                         datasources(csvdir, override, precedence, scope).each do |file|
                             if answer.nil?
-                                Puppet.debug("extlookup/csv Looking for data in #{file}")
+                                Puppet.debug("extlookup/csv: Looking for data in #{file}")
 
                                 if File.exist?(file)
                                     data = CSV.read(file).find_all {|r| r[0] == key}

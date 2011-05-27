@@ -14,6 +14,6 @@ module Puppet::Parser::Functions
         require "puppet/util/extlookup/#{parser.downcase}_parser"
 
         parser = Kernel.const_get("Puppet").const_get("Util").const_get("Extlookup").const_get("#{parser}_Parser")
-        parser.lookup(key, default, override, config, self.to_hash)
+        parser.lookup(key, default, override, config, self)
     end
 end
