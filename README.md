@@ -30,6 +30,21 @@ data it wont touch those.
 To configure just set :datadir to a directory full of files ending
 in .yaml
 
+Puppet
+------
+
+A parser that reads values from Puppet manifests inspired by
+Nigel Kerstens get() function.  Without configured precedence
+the behavior of this backend will be identical to the get()
+function
+
+In addition to the simple features of the get() function it
+also includes full precedence in line with the extlookup
+features.
+
+For details of the precedence behavior for this backend see
+the comments top of the backend.
+
 Configuration?
 ==============
 
