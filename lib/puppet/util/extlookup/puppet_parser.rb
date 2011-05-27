@@ -57,6 +57,8 @@ module Puppet
                     precedence << [calling_class, data_class].join("::")
                     precedence << [calling_module, data_class].join("::") unless calling_module == calling_class
 
+                    precedence.insert(0, [data_class, @override].join("::")) if @override
+
                     precedence
                 end
 

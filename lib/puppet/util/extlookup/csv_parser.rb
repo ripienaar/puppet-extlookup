@@ -96,8 +96,10 @@ module Puppet
                     if @scope.lookupvar("extlookup_precedence") != ""
                         precedence = @scope.lookupvar("extlookup_precedence")
                     else
-                        precedence = @config[:precedence] || ["common"]
+                        precedence = [@config[:precedence]].flatten || ["common"]
                     end
+
+                    precedence.insert(0, @override) if @override
 
                     datasources(precedence).each do |file|
                         if answer.nil?

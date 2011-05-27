@@ -61,6 +61,8 @@ module Puppet
                         precedence = @config[:precedence] || ["common"]
                     end
 
+                    precedence.insert(0, @override) if @override
+
                     datasources(precedence).each do |file|
                         if answer.nil?
                             Puppet.debug("extlookup/yaml: Looking for data in #{file}")
