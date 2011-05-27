@@ -6,6 +6,12 @@ puppet manifests can be configured to query different backends
 like a backward compatible CSV file, YAML files or in-module
 data.
 
+Configuration?
+==============
+
+You need a YAML file called extlookup.yaml in the same directory as
+your puppet.conf it looks like the examples below
+
 Parsers?
 ========
 
@@ -19,6 +25,27 @@ don't exist the new config file
 To configure just set :datadir to a directory full of files ending
 in .csv
 
+<pre>
+   ---
+   :parser: CSV
+   :precedence:
+   - environment_%{environment}
+   - common
+   :csv:
+      :datadir: /etc/puppet/extdata
+</pre>
+
+This configures the function to look in a per environment
+CSV file and then in a common one.  Files are stored in
+/etc/puppet/extdata
+
+This is equivelant to the old config:
+
+<pre>
+$extlookup_datadir = "/etc/puppet/extdata"
+$extlookup_precedence = ["environment_%{environment}", "common"]
+</pre>
+
 YAML
 ----
 
@@ -27,8 +54,18 @@ For simple String data it will do variable parsing like the old
 CSV extlookup but if you put a hash or arrays of hashes in your
 data it wont touch those.
 
-To configure just set :datadir to a directory full of files ending
-in .yaml
+<pre>
+---
+:parser: YAML
+:precedence:
+- environment_%{environment}
+- common
+:yaml:
+   :datadir: /etc/puppet/extdata
+</pre>
+
+This configuration matches the above CSV configuration, all you
+need to do is create yaml files instead of CSV files.
 
 Puppet
 ------
@@ -45,20 +82,17 @@ features.
 For details of the precedence behavior for this backend see
 the comments top of the backend.
 
-Configuration?
-==============
-
-You need a YAML file in the same directory as your puppet.conf
-it looks something like this:
+You can also configure explicit behavior like proposed by
+Nigel:
 
 <pre>
-   ---
-   :parser: CSV
-   :precedence:
-   - test_%{environment}
-   - common
-   :csv:
-      :datadir: /home/rip/work/github/puppet-extlookup/extdata
+---
+:parser: Puppet
+:precedence:
+- %{calling_class}
+- %{calling_module}
+:puppet:
+   :datasource: data
 </pre>
 
 Status?
