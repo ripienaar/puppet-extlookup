@@ -22,6 +22,20 @@ Compatible with old extlookup, all the feature of the old extlookup
 and supports config using the old global variables and if those
 don't exist the new config file
 
+In addition to the traditional extlookup CSV behavior this version
+can also create hashes.  A data file like the one below:
+
+<pre>
+example.com,docroot=/var/www/example.com,contact=you@example.com
+</pre>
+
+Will return a Puppet hash:
+
+<pre>
+{"docroot" => "/var/www/example.com",
+ "contact" => "you@example.com"}
+</pre>
+
 To configure just set :datadir to a directory full of files ending
 in .csv
 

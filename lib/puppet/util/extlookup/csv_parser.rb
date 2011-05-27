@@ -29,7 +29,12 @@ module Puppet
                         tdata.gsub!(/%\{#{$1}\}/, @scope.lookupvar($1))
                     end
 
-                    return tdata
+                    if tdata =~ /^([\w_]+)=(.+)/
+                        tdata = {$1 => $2}
+                        return tdata
+                    else
+                        return tdata.to_s
+                    end
                 end
 
                 def datadir
@@ -81,7 +86,7 @@ module Puppet
                         end
                     end
 
-                    return answer.to_s
+                    return answer
                 end
 
                 def lookup(key)
