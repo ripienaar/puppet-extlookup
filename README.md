@@ -15,6 +15,7 @@ Configuration?
 You need a YAML file in the same directory as your puppet.conf
 it looks something like this:
 
+<pre>
    ---
    :parser: CSV
    :precedence:
@@ -22,11 +23,12 @@ it looks something like this:
    - common
    :csv:
       :datadir: /home/rip/work/github/puppet-extlookup/extdata
+</pre>
 
 Status?
 =======
 
-This is a work in progress, do not use yes.
+This is a work in progress, do not use yet.
 
 Contact?
 ========
