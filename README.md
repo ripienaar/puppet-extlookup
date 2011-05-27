@@ -6,8 +6,29 @@ puppet manifests can be configured to query different backends
 like a backward compatible CSV file, YAML files or in-module
 data.
 
-At present only a CSV file backend is implimented, the rest
-will follow.
+Parsers?
+========
+
+CSV
+---
+
+Compatible with old extlookup, all the feature of the old extlookup
+and supports config using the old global variables and if those
+don't exist the new config file
+
+To configure just set :datadir to a directory full of files ending
+in .csv
+
+YAML
+----
+
+A YAML parser that supports the same precedence and overrides.
+For simple String data it will do variable parsing like the old
+CSV extlookup but if you put a hash or arrays of hashes in your
+data it wont touch those.
+
+To configure just set :datadir to a directory full of files ending
+in .yaml
 
 Configuration?
 ==============
@@ -28,7 +49,7 @@ it looks something like this:
 Status?
 =======
 
-This is a work in progress, do not use yet.
+This is a work in progress, use at your own risk
 
 Contact?
 ========
