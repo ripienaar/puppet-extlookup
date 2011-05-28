@@ -46,6 +46,14 @@ module Puppet
                     return datadir
                 end
 
+                def data_precedence
+                    precedence = @config[:precedence] || ["common"]
+
+                    precedence.insert(0, @override) if @override
+
+                    precedence
+                end
+
                 def lookup(key)
                     answer = nil
 
@@ -53,17 +61,7 @@ module Puppet
 
                     raise(Puppet::ParseError, "Extlookup YAML backend is unconfigured") unless @config.include?(:yaml)
 
-                    # use backward compat global variables if they exist
-                    # use the config file if they dont
-                    if @scope.lookupvar("extlookup_precedence") != ""
-                        precedence = @scope.lookupvar("extlookup_precedence")
-                    else
-                        precedence = @config[:precedence] || ["common"]
-                    end
-
-                    precedence.insert(0, @override) if @override
-
-                    datasources(precedence).each do |file|
+                    datasources(data_precedence).each do |file|
                         if answer.nil?
                             Puppet.debug("extlookup/yaml: Looking for data in #{file}")
 
