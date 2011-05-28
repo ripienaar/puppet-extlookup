@@ -29,12 +29,7 @@ module Puppet
                         tdata.gsub!(/%\{#{$1}\}/, @scope.lookupvar($1))
                     end
 
-                    if tdata =~ /^([\w_]+)=(.+)/
-                        tdata = {$1 => $2}
-                        return tdata
-                    else
-                        return tdata.to_s
-                    end
+                    tdata
                 end
 
                 def datadir
@@ -62,27 +57,27 @@ module Puppet
                 end
 
                 def parse_csv(data)
-                    Puppet.debug("extlookup/csv: parsing #{data} for special characters")
-
                     answer = nil
+
+                    data = [data].flatten
 
                     # return just the single result if theres just one,
                     # else take all the fields in the csv and build an array
                     if data.length > 0
-                        if data[0].length == 2
-                            val = data[0][1].to_s
+                        if data.length == 2
+                            val = data[1].to_s
 
                             answer = parse_data_contents(val)
-                        end
-                    elsif data[0].length > 1
-                        length = data[0].length
-                        cells = data[0][1,length]
+                        elsif data.length > 2
+                            length = data.length
+                            cells = data[1,length]
 
-                        # Individual cells in a CSV result are a weird data type and throws
-                        # puppets yaml parsing, so just map it all to plain old strings
-                        answer = cells.map do |cell|
-                            cell = parse_data_contents(cell)
-                            cell.to_s
+                            # Individual cells in a CSV result are a weird data type and throws
+                            # puppets yaml parsing, so just map it all to plain old strings
+                            answer = cells.map do |cell|
+                                cell = parse_data_contents(cell)
+                                cell.to_s
+                            end
                         end
                     end
 
