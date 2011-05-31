@@ -24,6 +24,8 @@ module Puppet::Parser::Functions
         config = YAML.load_file(configfile)
         parser = config[:parser] || "CSV"
 
+        require 'puppet/util/extlookup'
+
         relpath = File.join(File.dirname(__FILE__), "..", "..", "..")
         require "#{relpath}/puppet/util/extlookup/#{parser.downcase}_parser"
 
