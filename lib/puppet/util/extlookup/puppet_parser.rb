@@ -38,7 +38,7 @@ module Puppet
 
                 def precedence
                     begin
-                        data_class = @config[:puppet][:datasource]
+                        data_class = @config[:puppet][:datasource] || "data"
                     rescue
                         data_class = "data"
                     end
@@ -68,12 +68,14 @@ module Puppet
 
                     while tdata =~ /%\{(.+?)\}/
                         key = $1
-                        val = @scope.lookupvar(key)
+                        val = nil
 
                         if key == "calling_class"
                             val = calling_class
                         elsif key == "calling_module"
                             val = calling_module
+                        else
+                            val = @scope.lookupvar(key)
                         end
 
                         tdata.gsub!(/%\{#{$1}\}/, val)
