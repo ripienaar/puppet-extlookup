@@ -12,20 +12,25 @@ module Puppet
                 end
 
                 def backward_compat_datadir
-                    datadir = File.join(File.dirname(Puppet.settings[:config]), "extdata")
+                    config = @config[:csv] || {}
 
-                    scope_dir = @scope.lookupvar("extlookup_datadir")
-
-                    # use the backward compat $extlookup_datadir if its
-                    # set else use the config file
-                    if scope_dir != ""
-                        Puppet.notice("extlookup/csv: Using the global variable $extlookup_datadir is deprecated, please use a config file instead")
-
-                        datadir = scope_dir
-                    elsif @config[:csv][:datadir]
-                        datadir = @config[:csv][:datadir]
+                    if config[:datadir]
+                        datadir = config[:datadir]
                     else
+                        datadir = File.join(File.dirname(Puppet.settings[:config]), "extdata")
                         Puppet.notice("extlookup/csv: Using #{datadir} for extlookup CSV data as no datadir is configured")
+                    end
+
+                    if @scope.respond_to?(:lookupvar)
+                        scope_dir = @scope.lookupvar("extlookup_datadir")
+
+                        # use the backward compat $extlookup_datadir if its
+                        # set else use the config file
+                        if scope_dir != ""
+                            Puppet.notice("extlookup/csv: Using the global variable $extlookup_datadir is deprecated, please use a config file instead")
+
+                            datadir = scope_dir
+                        end
                     end
 
                     raise(Puppet::ParseError, "Extlookup CSV datadir (#{datadir}) not found") unless File.directory?(datadir)
@@ -73,8 +78,11 @@ module Puppet
 
                     # use backward compat global variables if they exist
                     # use the config file if they dont
-                    if @scope.lookupvar("extlookup_precedence") != ""
-                        precedence = @scope.lookupvar("extlookup_precedence")
+                    begin
+                        if @scope.lookupvar("extlookup_precedence") != ""
+                            precedence = @scope.lookupvar("extlookup_precedence")
+                        end
+                    rescue
                     end
 
                     datadir = backward_compat_datadir
