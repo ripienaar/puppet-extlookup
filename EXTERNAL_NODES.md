@@ -71,7 +71,7 @@ classes:
 - users::production
 - ntp::client:
     ntpservers: :ntpservers
-foo_vhost:
+foo.com:
   contact: webmaster@foo.com
   docroot: /var/www/foo.com
 </pre>
