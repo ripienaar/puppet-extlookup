@@ -14,12 +14,11 @@ module Puppet
                 def backward_compat_datadir
                     config = @config[:csv] || {}
 
-                    if config[:datadir]
-                        datadir = config[:datadir]
-                    else
-                        datadir = File.join(File.dirname(Puppet.settings[:config]), "extdata")
-                        Puppet.notice("extlookup/csv: Using #{datadir} for extlookup CSV data as no datadir is configured")
+                    unless (datadirpath = config[:datadir])
+                        datadirpath = File.join(File.dirname(Puppet.settings[:config]), "extdata")
+                        Puppet.notice("extlookup/csv: Using #{datadirpath} for extlookup CSV data as no datadir is configured")
                     end
+                    datadir = Extlookup.parse_data_contents(datadirpath, @scope)
 
                     if @scope.respond_to?(:lookupvar)
                         scope_dir = @scope.lookupvar("extlookup_datadir")

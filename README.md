@@ -67,6 +67,16 @@ data it wont touch those.
 This configuration matches the above CSV configuration, all you
 need to do is create yaml files instead of CSV files.
 
+Both (YAML and CSV) support variables also in the datadir option,
+so that for example you are able to point puppet to different
+datadirs depending on the current environment:
+
+<pre>
+[...]
+:yaml:
+    :datadir: /etc/puppet/environments/%{environment}/extdata
+</pre>
+
 Puppet
 ------
 

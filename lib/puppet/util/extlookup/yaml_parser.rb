@@ -17,7 +17,7 @@ module Puppet
 
                     raise(Puppet::ParseError, "Extlookup YAML backend is unconfigured") unless @config.include?(:yaml)
 
-                    datadir = Extlookup.datadir(@config, :yaml, :datadir)
+                    datadir = Extlookup.datadir(@config, :yaml, :datadir,@scope)
 
                     Extlookup.datasources(@config, @override, precedence) do |source|
                         source = Extlookup.parse_data_contents(source, @scope)

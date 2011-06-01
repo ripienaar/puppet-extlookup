@@ -8,27 +8,44 @@ module Puppet::Util
             it "should default to configured data dir" do
                 config = mock
                 config.expects("[]").with(:csv).returns({:datadir => "/tmp"})
+                store = mock
+                store.expects(:lookupvar).never
 
-                Puppet::Util::Extlookup.datadir(config, :csv, :datadir).should == "/tmp"
+                Puppet::Util::Extlookup.datadir(config, :csv, :datadir,store).should == "/tmp"
             end
 
             it "should default to Puppet configdir + extdata for data if unconfigured" do
                 config = mock
                 config.expects("[]").with(:csv).returns({})
+                store = mock
+                store.expects(:lookupvar).never
 
                 Puppet.expects(:settings).returns({:config => "/tmp/puppet.conf"})
                 File.expects(:directory?).with("/tmp/extdata").returns(true)
 
-                Puppet::Util::Extlookup.datadir(config, :csv, :datadir).should == "/tmp/extdata"
+                Puppet::Util::Extlookup.datadir(config, :csv, :datadir,store).should == "/tmp/extdata"
             end
 
             it "should fail if the datadir does not exist" do
                 config = mock
                 config.expects("[]").with(:csv).returns({:datadir => "/nonexisting"})
+                store = mock
+                store.expects(:lookupvar).never
 
                 expect {
-                    Puppet::Util::Extlookup.datadir(config, :csv, :datadir)
+                    Puppet::Util::Extlookup.datadir(config, :csv, :datadir, store)
                 }.to raise_error("Extlookup datadir (/nonexisting) not found")
+            end
+
+            it "should substitute variables in datadir" do
+                config = mock
+                config.expects("[]").with(:csv).returns({:datadir => "/some/path/with/variables/%{test}/in/path"})
+                store = mock
+                store.expects(:lookupvar).with("test").returns("data")
+                store.expects(:respond_to?).with(:lookupvar).returns(true)
+                File.expects(:directory?).with("/some/path/with/variables/data/in/path").returns(true)
+
+                Puppet::Util::Extlookup.datadir(config, :csv, :datadir,store).should == "/some/path/with/variables/data/in/path"
             end
         end
 
