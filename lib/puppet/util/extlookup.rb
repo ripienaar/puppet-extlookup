@@ -2,6 +2,23 @@ module Puppet
     module Util
         module Extlookup
             class << self
+                def datadir(config, key, dirkey)
+                    config = config[key] || {}
+
+                    if config[dirkey]
+                        datadir = config[dirkey]
+                    else
+                        datadir = File.join(File.dirname(Puppet.settings[:config]), "extdata")
+                        Puppet.notice("extlookup/#{key}: Using #{datadir} for extlookup data as no datadir is configured")
+                    end
+
+                    raise(Puppet::ParseError, "Extlookup datadir (#{datadir}) not found") unless File.directory?(datadir)
+
+                    Puppet.debug("extlookup/#{key}: Looking for data in #{datadir}")
+
+                    return datadir
+                end
+
                 def datasources(config, override=nil, precedence=nil)
                     if precedence
                         precedence = [precedence]

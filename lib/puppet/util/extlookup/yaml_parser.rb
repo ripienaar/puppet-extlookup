@@ -9,59 +9,20 @@ module Puppet
                     @scope = scope
                 end
 
-                def datasources(precedence)
-                    sources = []
-
-                    [precedence].flatten.map do |file|
-                        file = parse_data_contents(file)
-
-                        File.join([datadir, "#{file}.yaml"])
-                    end
-                end
-
-                # parse %{}'s in the data into local variables using lookupvar()
-                def parse_data_contents(data)
-                    tdata = data.clone
-
-                    while tdata =~ /%\{(.+?)\}/
-                        tdata.gsub!(/%\{#{$1}\}/, @scope.lookupvar($1))
-                    end
-
-                    return tdata
-                end
-
-                def datadir
-                    datadir = File.join(File.dirname(Puppet.settings[:config]), "extdata")
-
-                    if @config[:yaml][:datadir]
-                        datadir = @config[:yaml][:datadir]
-                    else
-                        Puppet.notice("extlookup/yaml: Using #{datadir} for extlookup data as no datadir is configured")
-                    end
-
-                    raise(Puppet::ParseError, "Extlookup datadir (#{datadir}) not found") unless File.directory?(datadir)
-
-                    Puppet.debug("extlookup/yaml: Looking for data in #{datadir}")
-
-                    return datadir
-                end
-
-                def data_precedence
-                    precedence = @config[:precedence] || ["common"]
-
-                    precedence.insert(0, @override) if @override
-
-                    precedence
-                end
-
                 def lookup(key)
                     answer = nil
+                    precedence = nil
 
                     Puppet.debug("extlookup/yaml: looking for key=#{key} with default=#{@default}")
 
                     raise(Puppet::ParseError, "Extlookup YAML backend is unconfigured") unless @config.include?(:yaml)
 
-                    datasources(data_precedence).each do |file|
+                    datadir = Extlookup.datadir(@config, :yaml, :datadir)
+
+                    Extlookup.datasources(@config, @override, precedence) do |source|
+                        source = Extlookup.parse_data_contents(source, @scope)
+                        file = File.join([datadir, "#{source}.yaml"])
+
                         if answer.nil?
                             Puppet.debug("extlookup/yaml: Looking for data in #{file}")
 
@@ -72,7 +33,7 @@ module Puppet
                                 next unless data.include?(key)
 
                                 if data[key].is_a?(String)
-                                    answer = parse_data_contents(data[key])
+                                    answer = Extlookup.parse_data_contents(data[key], @scope)
                                 else
                                     answer = data[key]
                                 end

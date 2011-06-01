@@ -4,6 +4,34 @@ require File.dirname(__FILE__) + '/../../spec_helper'
 
 module Puppet::Util
     describe Extlookup do
+        describe "#datadir" do
+            it "should default to configured data dir" do
+                config = mock
+                config.expects("[]").with(:csv).returns({:datadir => "/tmp"})
+
+                Puppet::Util::Extlookup.datadir(config, :csv, :datadir).should == "/tmp"
+            end
+
+            it "should default to Puppet configdir + extdata for data if unconfigured" do
+                config = mock
+                config.expects("[]").with(:csv).returns({})
+
+                Puppet.expects(:settings).returns({:config => "/tmp/puppet.conf"})
+                File.expects(:directory?).with("/tmp/extdata").returns(true)
+
+                Puppet::Util::Extlookup.datadir(config, :csv, :datadir).should == "/tmp/extdata"
+            end
+
+            it "should fail if the datadir does not exist" do
+                config = mock
+                config.expects("[]").with(:csv).returns({:datadir => "/nonexisting"})
+
+                expect {
+                    Puppet::Util::Extlookup.datadir(config, :csv, :datadir)
+                }.to raise_error("Extlookup datadir (/nonexisting) not found")
+            end
+        end
+
         describe "#parse_data_contents" do
             it "should clone the data" do
                 data = mock(:clone)
