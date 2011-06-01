@@ -50,6 +50,19 @@ module Puppet::Util::Extlookup
                     csv.backward_compat_datadir
                 }.to raise_error("Extlookup CSV datadir (/nonexisting) not found")
             end
+
+            it "should substitute variables in datadir" do
+                config = mock
+                config.expects("[]").with(:csv).returns({:datadir => "/some/path/with/variables/%{test}/in/path"})
+                scope = mock
+                scope.expects(:lookupvar).with("test").returns("data")
+                scope.stubs(:respond_to?).with(:lookupvar).returns(true)
+                scope.expects(:lookupvar).with('extlookup_datadir').returns("")
+                File.expects(:directory?).with("/some/path/with/variables/data/in/path").returns(true)
+
+                csv = CSV_Parser.new(nil, nil, config, scope)
+                csv.backward_compat_datadir.should == "/some/path/with/variables/data/in/path"
+            end
         end
 
         describe "#parse_csv" do
