@@ -2,15 +2,14 @@ module Puppet
     module Util
         module Extlookup
             class << self
-                def datadir(config, key, dirkey)
+                def datadir(config, key, dirkey, store)
                     config = config[key] || {}
 
-                    if config[dirkey]
-                        datadir = config[dirkey]
-                    else
-                        datadir = File.join(File.dirname(Puppet.settings[:config]), "extdata")
-                        Puppet.notice("extlookup/#{key}: Using #{datadir} for extlookup data as no datadir is configured")
+                    unless (datadirpath = config[dirkey])
+                        datadirpath = File.join(File.dirname(Puppet.settings[:config]), "extdata")
+                        Puppet.notice("extlookup/#{key}: Using #{datadirpath} for extlookup data as no datadir is configured")
                     end
+                    datadir = parse_data_contents(datadirpath,store)
 
                     raise(Puppet::ParseError, "Extlookup datadir (#{datadir}) not found") unless File.directory?(datadir)
 
