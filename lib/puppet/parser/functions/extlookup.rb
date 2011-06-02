@@ -1,14 +1,19 @@
 module Puppet::Parser::Functions
-    newfunction(:extlookup, :type => :rvalue) do |*args|
-        # Functions called from puppet manifests that look like this:
-        #   lookup("foo", "bar")
-        # internally in puppet are invoked:  func(["foo", "bar"])
+    newfunction(:extlookup, :type => :rvalue, :docs => "A version of extlookup with a pluggable backend. The same puppet manifests can be configured to query different backends like a backward compatible CSV file, YAML files or in-module data.") do |*args|
+        # Functions called from Puppet manifests look like this:
         #
-        # where as calling from templates should work like this:
-        #   scope.function_lookup("foo", "bar")
+        #   extlookup("foo", "bar")
+        # 
+        # Internally in Puppet are invoked like:
         #
-        #  Therefore, declare this function with args '*args' to accept any number
-        #  of arguments and deal with puppet's special calling mechanism now:
+        #   func(["foo", "bar"])
+        #
+        # Whereas calling from templates should work like this:
+        #   
+        #   scope.function_extlookup("foo", "bar")
+        #
+        # Therefore, declare this function with args '*args' to accept any number
+        # of arguments and deal with puppet's special calling mechanism now:
         if args[0].is_a?(Array)
             args = args[0]
         end
