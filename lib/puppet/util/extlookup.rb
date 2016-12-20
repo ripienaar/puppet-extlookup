@@ -40,7 +40,7 @@ module Puppet
                     tdata = data.clone
 
                     while tdata =~ /%\{(.+?)\}/
-                        var = $1
+                        var = $1.to_s
 
                         # if running in puppet we should make best use of the
                         # scope variable by using lookupvar, else maybe someone
@@ -48,9 +48,9 @@ module Puppet
                         # a Puppet scope.  Would have been handy if scope had a []
                         # alias to lookupvar really
                         if store.respond_to?(:lookupvar)
-                            tdata.gsub!(/%\{#{var}\}/, store.lookupvar(var))
+                            tdata.gsub!(/%\{#{var}\}/, store.lookupvar(var).to_s)
                         elsif store.respond_to?("[]")
-                            tdata.gsub!(/%\{#{var}\}/, store[var])
+                            tdata.gsub!(/%\{#{var}\}/, store[var].to_s)
                         else
                             raise("Don't know how to extract data from a store of type #{store.class}")
                         end
