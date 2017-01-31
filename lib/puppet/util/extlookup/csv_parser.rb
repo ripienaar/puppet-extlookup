@@ -25,7 +25,7 @@ module Puppet
 
                         # use the backward compat $extlookup_datadir if its
                         # set else use the config file
-                        if scope_dir != ""
+                        if scope_dir != nil
                             Puppet.notice("extlookup/csv: Using the global variable $extlookup_datadir is deprecated, please use a config file instead")
 
                             datadir = scope_dir
@@ -78,7 +78,7 @@ module Puppet
                     # use backward compat global variables if they exist
                     # use the config file if they dont
                     begin
-                        if @scope.lookupvar("extlookup_precedence") != ""
+                        if @scope.lookupvar("extlookup_precedence") != nil
                             precedence = @scope.lookupvar("extlookup_precedence")
                         end
                     rescue
